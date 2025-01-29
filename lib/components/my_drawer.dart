@@ -8,11 +8,10 @@ import 'my_drawer_tile.dart';
 class MyDrawer extends StatelessWidget {
    MyDrawer({super.key});
 
-  final user = FirebaseAuth.instance.currentUser!;
 
-  void signUserOut() {
-    FirebaseAuth.instance.signOut();
-  }
+  // Access current user
+ final User? currentUser = AuthService().currentUser!;
+
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +29,7 @@ class MyDrawer extends StatelessWidget {
             ),
           ),
 
-          Text(user.email!),
+          Text(currentUser!.email!),
 
           Padding(
             padding: const EdgeInsets.all(25.0),
