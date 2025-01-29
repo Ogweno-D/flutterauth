@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterauth/components/my_drawer.dart';
 import 'package:flutterauth/services/auth_service.dart';
@@ -5,8 +6,7 @@ import 'package:flutterauth/services/auth_service.dart';
 class HomePage extends StatelessWidget {
    HomePage({super.key});
 
-  final authService = AuthService();
-
+  final User? currentUser = AuthService().currentUser!;
 
   @override
   Widget build(BuildContext context) {
@@ -15,13 +15,13 @@ class HomePage extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
-            onPressed: (){},
+            onPressed: ()=>AuthService().signOut(),
           )
         ],
       ),
       drawer: MyDrawer(),
       body: Center(
-        child: Text("Logged In!"),
+        child: Text("Welcome  ${currentUser!.email!}"),
       ),
     );
   }

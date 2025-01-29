@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutterauth/pages/home_page.dart';
 import 'package:flutterauth/pages/login_page.dart';
 import 'package:flutterauth/services/auth_service.dart';
 
 import '../components/my_button.dart';
 import '../components/my_textfield.dart';
+import '../components/square_tile.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -20,44 +20,69 @@ class _RegisterPageState extends State<RegisterPage> {
 
   final confirmPasswordController = TextEditingController();
 
-  // void registerUser() async {
-  //   // Prepare the data
-  //   final email = emailController.text;
-  //   final password = passwordController.text;
-  //   final confirmPassword = confirmPasswordController.text;
+  void registerUser() async {
+    // Prepare the data
+    final email = emailController.text;
+    final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
 
   //   // Confirm Password
-  //   if (password != confirmPassword) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(content: Text("Passwords do not match")));
-  //     return;
-  //   }
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Passwords do not match")));
+      return;
+    }
 
-  //   // Show dialog to user
-  //   showDialog(
-  //       context: context,
-  //       builder: (context) {
-  //         return const Center(
-  //           child: CircularProgressIndicator.adaptive(),
-  //         );
-  //       });
+   // Show dialog to user
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(
+            child: CircularProgressIndicator.adaptive(),
+          );
+        });
 
-  //   // Attempt sign up..
-  //   try {
-  //     await FirebaseAuth.instance
-  //         .createUserWithEmailAndPassword(email: email, password: password);
-  //     // Pop the page
-  //     Navigator.pop(context);
-  //   } on FirebaseAuthException catch (e) {
-  //     // Catch any errors
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context)
-  //           .showSnackBar(SnackBar(content: Text("Error: $e")));
-  //     }
-  //     // Pop the circle
-  //     Navigator.pop(context);
-  //   }
-  // }
+  // Attempt sign up..
+    try {
+      await AuthService().signUpWithEmailAndPassword(
+            email, password);
+      // Pop the page
+      Navigator.pop(context);
+    } catch (e) {
+      // Catch any errors
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
+      // Pop the circle
+      Navigator.pop(context);
+    }
+  }
+
+  // Google sign In
+  void googleSignIn() async {
+     // Show dialog to user
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(
+            child: CircularProgressIndicator.adaptive(),
+          );
+        });
+
+    try {
+      await AuthService().signInWithGoogle();
+      Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
+      // Pop the circle
+      Navigator.pop(context);
+      
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,14 +161,70 @@ class _RegisterPageState extends State<RegisterPage> {
           // Sign In Button
           MyButton(
             text: "Register",
-            onTap: () {
-              AuthService().signUpWithEmailPassword(
-                  emailController.text, passwordController.text);
+            onTap: registerUser,
+            // onTap: () {
+            //   AuthService().signUpWithEmailAndPassword(
+            //       emailController.text, passwordController.text);
 
-              Navigator.pushReplacement(context, 
-                  MaterialPageRoute(builder: (context)=>HomePage(),));
-            },
+            //   Navigator.pushReplacement(context, 
+            //       MaterialPageRoute(builder: (context)=>HomePage(),));
+            // },
           ),
+
+          // Or Continue with
+              Padding(
+                padding: const EdgeInsets.all(25.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Divider(
+                        thickness: 0.5,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      child: Text(
+                        "Or continue with",
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        thickness: 0.5,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Google and Apple Sign In
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Google
+                  SquareTile(
+                    onTap: googleSignIn,
+                    // onTap:()=>AuthService().signInWithGoogle(),
+                    imagePath: 'lib/images/google.png'),
+
+                  const SizedBox(
+                    width: 25,
+                  ),
+
+                  // Apple
+                  SquareTile(
+                    onTap: (){},
+                    imagePath: 'lib/images/apple.png')
+                ],
+              ),
+
+              SizedBox(
+                height: 20,
+              ),
 
           SizedBox(height: 15,),
           // Already a member? Login
@@ -162,7 +243,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => LoginPage(),
+                            builder: (context) => LoginPage(
+                              onTap: (){},
+                            ),
                           ));
                     },
                     child: Text(

@@ -1,14 +1,15 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutterauth/components/my_button.dart';
 import 'package:flutterauth/components/my_textfield.dart';
 import 'package:flutterauth/components/square_tile.dart';
-import 'package:flutterauth/pages/register_page.dart';
 import 'package:flutterauth/services/auth_service.dart';
-
-import 'home_page.dart';
+import 'package:flutterauth/utils/utils.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final Function()? onTap;
+  const LoginPage({super.key, required this.onTap});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -21,56 +22,32 @@ class _LoginPageState extends State<LoginPage> {
 
   // Sign In function
   void signInUser() async {
-    // Get instance of auth sevice
+    // Get instance of AuthService
     final authService = AuthService();
 
-    // Show dialog to user
-    showDialog(
-        context: context,
-        builder: (context) {
-          return const Center(
-            child: CircularProgressIndicator.adaptive(),
-          );
-        });
+    // Show dialog to the user
+    await showLoadingDialog(context);
 
+    // Attempt Sign In
     try {
-      await authService.signInWithEmailPassword(
+      // Await sign-in attempt
+      await authService.signInWithEmailAndPassword(
           emailController.text, passwordController.text);
+
+      // Close the dialog after successful sign-in
       Navigator.pop(context);
     } catch (e) {
-      showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-                backgroundColor: Colors.grey[700],
-                title: Text(e.toString()),
-              ));
-
+      // Close the dialog on error
       Navigator.pop(context);
+
+      // Show the error message to the user
+      // ScaffoldMessenger.of(context)
+      //     .showSnackBar(SnackBar(content: Text(e.toString())));
+      showFlashError(context, e.toString());
     }
-    // try {
-    //   await FirebaseAuth.instance.signInWithEmailAndPassword(
-    //     email: emailController.text,
-    //     password: passwordController.text,
-    //   );
-    //   // Pop the circle after sign up
-    //   Navigator.pop(context);
-    // } on FirebaseAuthException catch (e) {
-    //   // Wrong Email
-    //   Navigator.pop(context);
-
-    //   if (e.code == 'user-not-found') {
-    //     wrongEmailMessage();
-
-    //     // Wrong Password
-    //   } else if (e.code == "wrong-password") {
-    //     wrongPasswordMessage();
-    //   }
-    // }
-
-    // Pop the loading circle when finished loading
-    // Navigator.pop(context);
   }
 
+//Wrong Email
   void wrongEmailMessage() {
     showDialog(
         context: context,
@@ -81,6 +58,7 @@ class _LoginPageState extends State<LoginPage> {
         });
   }
 
+// Wroen Password
   void wrongPasswordMessage() {
     showDialog(
         context: context,
@@ -91,14 +69,21 @@ class _LoginPageState extends State<LoginPage> {
         });
   }
 
-  void forgotPassword() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog.adaptive(
-        backgroundColor: Colors.grey[700],
-        title: const Text("User forgot password"),
-      ),
-    );
+  // Forgor password
+  void forgotPassword() async {
+    // uthservice Instance
+    final authService = AuthService();
+
+    try {
+      await authService.forgotPassword(emailController.text);
+      // Show a success message
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Password reset email sent!')));
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
+    }
   }
 
   @override
@@ -162,7 +147,8 @@ class _LoginPageState extends State<LoginPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text("Forgot password?"),
+                    GestureDetector(
+                        onTap: forgotPassword, child: Text("Forgot password?")),
                   ],
                 ),
               ),
@@ -215,20 +201,17 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Google
-                  GestureDetector(
-                      onTap: () {
-                        AuthService().signInWithGoogle();
-                        Navigator.pushReplacement(context, 
-                              MaterialPageRoute(builder: (context)=>HomePage(),));
-                      },
-                      child: SquareTile(imagePath: 'lib/images/google.png')),
+                  SquareTile(
+                    imagePath: 'lib/images/google.png',
+                    onTap: () => AuthService().signInWithGoogle(),
+                  ),
 
                   const SizedBox(
                     width: 25,
                   ),
 
                   // Apple
-                  SquareTile(imagePath: 'lib/images/apple.png')
+                  SquareTile(onTap: () {}, imagePath: 'lib/images/apple.png'),
                 ],
               ),
 
@@ -248,13 +231,14 @@ class _LoginPageState extends State<LoginPage> {
                     width: 5,
                   ),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RegisterPage(),
-                          ));
-                    },
+                    onTap: widget.onTap,
+                    // onTap: () {
+                    //   Navigator.pushReplacement(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //         builder: (context) => RegisterPage(),
+                    //       ));
+                    // },
                     child: Text(
                       "Register now",
                       style: TextStyle(
