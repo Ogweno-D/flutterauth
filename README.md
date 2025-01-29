@@ -11,13 +11,7 @@ This is a full flutter authentication implementation using Flutter and Firebase.
 
 First here is the UI (User Interface) for the Login and the Register pages.
 
-### Login
-
-![Login UI](lib/images/Login%20UI.jpg)
-
-### Register
-
-![Register UI](lib/images/RegisterUI.jpg)
+![Login UI](lib/images/loginUI.jpg) ![Register UI](lib/images/RegisterUI.jpg) ![Google UI](lib/images/google.jpg) ![Welcome UI](lib/images/welcomeUI.jpg)
 
 This implements Google Sign In for both Android and Ios platfoms
 
